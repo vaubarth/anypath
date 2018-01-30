@@ -1,7 +1,7 @@
 =======
 AnyPath
 =======
-AnyPath makes it trivial to fetch remote ressources and work with them locally.
+AnyPath makes it trivial to fetch remote resources and work with them locally.
 
 Getting Started
 ===============
@@ -77,7 +77,7 @@ Beware that you will have to call `close()` manually when not using the contextm
 
 Persistance
 ^^^^^^^^^^^
-The example so far was useful if you are only interested in the content of a fetched resource. They are created in a temporary folder, where you can work with them, and are deletetd afterwards.
+The example so far was useful if you are only interested in the content of a fetched resource. They are created in a temporary folder, where you can work with them, and are deleted afterwards.
 Sometimes however you may want to persist the remote resource outside of a temporary location.
 
 .. code-block:: python
@@ -92,7 +92,7 @@ As a result you will get the `persist_dir` wrapped as an `pathlib.Path` instead 
 
 Providers and options
 ^^^^^^^^^^^^^^^^^^^^^
-While the defaults for fetching resources might be fine for many usecases there are many situations where you might want to pass some options to a provider.
+While the defaults for fetching resources might be fine for many use cases there are many situations where you might want to pass some options to a provider.
 You might for example want to do a POST with an HttpPath or pass credentials to a GitPath.
 
 Options are always passed as keyword arguments. Following you will find all providers and their available options.
@@ -183,15 +183,13 @@ Everything is fetched to your local machine, which might take some time and cost
 
 Contributing
 ============
-You can contribute in any of the following areas, no matter if it is your first OSS contribution or your thousandst.
+You can contribute in any of the following areas, no matter if it is your first OSS contribution or your thousandths.
 Contributions are welcome for example:
 - If you find any issue or bug when using AnyPath
 - If you want to add to the documentation or fix incorrect or missing documentation.
 - If you want to add features or work on the codebase in general
 
 Just file an issue in the tracker first describing what you would like to do and then create a pull-request.
-
-Everything related to this project is governed by the Code of Conduct (CODE_OF_CONDUCT.rst).
 
 License
 -------
