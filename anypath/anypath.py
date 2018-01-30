@@ -89,10 +89,6 @@ class _Provider:
                 self.registry[patt] = provider
 
 
-class NotInstalledError(BaseException):
-    pass
-
-
 class UnknownProtocol(LookupError):
     pass
 

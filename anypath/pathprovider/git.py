@@ -1,7 +1,7 @@
-import shutil
 import subprocess
 
-from anypath.anypath import BasePath, pattern, NotInstalledError
+from anypath.anypath import BasePath, pattern
+from anypath.dependencies import check_dependency
 
 
 @pattern('git+http://', 'git+https://', 'git://')
@@ -12,7 +12,6 @@ class GitPath(BasePath):
 
     @BasePath.wrapped
     def fetch(self):
-        if shutil.which('git') is None:
-            raise NotInstalledError('Git is not installed or not on the path.')
+        check_dependency('git', 'Git is not installed or not on the path.')
         git_process = subprocess.Popen(['git', 'clone', self.protocol + self.path, self.out_path])
         git_process.wait()

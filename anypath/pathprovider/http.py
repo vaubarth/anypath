@@ -1,4 +1,5 @@
-from anypath.anypath import BasePath, pattern, NotInstalledError
+from anypath.anypath import BasePath, pattern
+from anypath.dependencies import do_import
 
 
 @pattern('http://', 'https://')
@@ -12,11 +13,7 @@ class HttpPath(BasePath):
 
     @BasePath.wrapped
     def fetch(self):
-        try:
-            import requests
-        except ModuleNotFoundError:
-            raise NotInstalledError('Python package requests is not installed.')
-
+        requests = do_import('requests')
         request = requests.Request(method=self.method,
                                    url=self.protocol + self.path,
                                    headers=self.headers,

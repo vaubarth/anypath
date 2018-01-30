@@ -1,7 +1,8 @@
 import os
 from pathlib import Path
 from stat import S_ISDIR
-from anypath.anypath import BasePath, pattern, NotInstalledError
+from anypath.anypath import BasePath, pattern
+from anypath.dependencies import do_import
 
 
 @pattern('sftp://')
@@ -19,28 +20,26 @@ class SftpPath(BasePath):
 
     @BasePath.wrapped
     def fetch(self):
-        try:
-            import paramiko
-        except ModuleNotFoundError:
-            raise NotInstalledError('Python package paramiko is not installed.')
-        from paramiko import SSHException
+        paramiko = do_import('paramiko')
 
-        self.sftp = paramiko.SFTPClient.from_transport(self._connect())
+        self.sftp = paramiko.SFTPClient.from_transport(self._connect(paramiko))
         self.sftp.chdir(str(self.path.parent))
         self._walk(self.path)
 
-    def _connect(self):
+    def _connect(self, paramiko):
         if self.private_key is not None:
             with open(self.private_key) as key_file:
                 key = paramiko.RSAKey.from_private_key(key_file, self.password)
         else:
             key = None
-        self._check_host()
+        self._check_host(paramiko)
         transport = paramiko.Transport((self.host, self.port))
         transport.connect(None, self.username, self.password, key)
         return transport
 
-    def _check_host(self):
+    def _check_host(self, paramiko):
+        from paramiko import SSHException
+
         hostkeys = paramiko.hostkeys.HostKeys()
         hostkeys.load(Path('~').expanduser().joinpath('.ssh', 'known_hosts'))
         if len(hostkeys.items()) == 0:
