@@ -2,6 +2,16 @@
 AnyPath
 =======
 AnyPath makes it trivial to fetch remote resources and work with them locally.
+It provides a normalized interface over different resources so that handling them is always consistent.
+Example::
+
+    with AnyPath('ssh://jane@host:/home/jane') as path:
+        path.joinpath('somefile.txt').open().read()
+
+Here AnyPath will copy the directory /home/jane from a remote host via ssh to a local temporary directory.
+It is then possible to work with the files locally. After we are done the temporary files are deleted.
+Therefore AnyPath is useful if you want to fetch e.g. some config files or a small project directory from a remote location and work with it locally.
+
 
 Getting Started
 ===============
@@ -176,10 +186,9 @@ None
 
 Limitations
 ^^^^^^^^^^^
-AnyPath is useful if you want to fetch e.g. some config files or a small project directory.
-
-However you might not want to use AnyPath if you are working with a huge remote resource.
+You might not want to use AnyPath if you are working with a huge remote resource.
 Everything is fetched to your local machine, which might take some time and cost a lot of space if you try to work with a whole filesystemn of a remote host for example.
+It is also not intended do do updates to the remote resource since there is no mechanism to write changes back to the remote.
 
 Contributing
 ============
