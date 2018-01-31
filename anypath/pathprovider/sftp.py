@@ -19,9 +19,7 @@ class SftpPath(BasePath):
         self.path = Path(self.path)
 
     @BasePath.wrapped
-    def fetch(self):
-        paramiko = do_import('paramiko')
-
+    def fetch(self, paramiko=do_import('paramiko')):
         self.sftp = paramiko.SFTPClient.from_transport(self._connect(paramiko))
         self.sftp.chdir(str(self.path.parent))
         self._walk(self.path)

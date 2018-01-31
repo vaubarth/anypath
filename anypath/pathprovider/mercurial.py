@@ -13,6 +13,6 @@ class HgPath(BasePath):
 
     @BasePath.wrapped
     def fetch(self):
-        check_dependency('hg', 'Mercurial (hg) is not installed or not on the path.')
+        check_dependency('hg')
         git_process = subprocess.Popen(['hg', 'clone', self.protocol + self.path, self.out_path])
         git_process.wait()

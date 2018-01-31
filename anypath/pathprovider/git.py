@@ -12,6 +12,6 @@ class GitPath(BasePath):
 
     @BasePath.wrapped
     def fetch(self):
-        check_dependency('git', 'Git is not installed or not on the path.')
+        check_dependency('git')
         git_process = subprocess.Popen(['git', 'clone', self.protocol + self.path, self.out_path])
         git_process.wait()

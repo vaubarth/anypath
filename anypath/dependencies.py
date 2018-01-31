@@ -6,9 +6,9 @@ class NotInstalledError(BaseException):
     pass
 
 
-def check_dependency(exec, error_message):
+def check_dependency(exec):
     if shutil.which(exec) is None:
-        raise NotInstalledError(error_message)
+        raise NotInstalledError(f'{exec} is not installed or not on the path.')
 
 
 def do_import(module):

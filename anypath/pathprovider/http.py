@@ -1,4 +1,4 @@
-from anypath.anypath import BasePath, pattern
+from anypath.anypath import BasePath, pattern, path_provider, AnyPath
 from anypath.dependencies import do_import
 
 
@@ -12,8 +12,7 @@ class HttpPath(BasePath):
         self.data = data
 
     @BasePath.wrapped
-    def fetch(self):
-        requests = do_import('requests')
+    def fetch(self, requests=do_import('requests')):
         request = requests.Request(method=self.method,
                                    url=self.protocol + self.path,
                                    headers=self.headers,
