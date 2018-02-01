@@ -1,12 +1,16 @@
 from pathlib import Path
-
 import shutil
 from abc import ABCMeta, abstractmethod
 from tempfile import mkdtemp
 
+from anypath.dependencies import check_executable
+from anypath.dependencies import do_import
+
 
 class BasePath(metaclass=ABCMeta):
-    def __init__(self, protocol, path, persist_dir=None):
+    dependencies = []
+    executables = []
+    def __init__(self, protocol, path, persist_dir=None, **options):
         self.persist_dir = persist_dir
         self.protocol = protocol
         self.path = path
@@ -16,14 +20,21 @@ class BasePath(metaclass=ABCMeta):
     @staticmethod
     def wrapped(func, *args, **kwargs):
         def decorator(self):
+            # Import all declared dependencies
+            modules = [do_import(dependency) for dependency in self.dependencies]
+            # Check required executables
+            for executable in self.executables:
+                check_executable(executable)
+
             self._make_temp()
-            func(self, *args, **kwargs)
+            # TODO: Check ordering of dependecies vs. args
+            func(self, *modules)
             self._persist()
             return self.out_path
         return decorator
 
     @abstractmethod
-    def fetch(self):
+    def fetch(self, *dependencies):
         pass
 
     def _make_temp(self):
@@ -60,6 +71,8 @@ class AnyPath(BasePath):
             if path.startswith(protocol):
                 path = path.replace(protocol, '', 1)
                 fetcher = path_provider.registry[protocol](protocol, path, persist_dir, **options)
+                fetcher.dependencies = cls.dependencies
+                fetcher.executables = cls.executables
                 return fetcher
         else:
             raise UnknownProtocol(f'Unknown protocol in {path} - Registered providers: {path_provider.registry}')
@@ -81,13 +94,26 @@ def pattern(*patterns):
 
 class _Provider:
     def __init__(self):
+        self.providers = set()
         self.registry = {}
 
     def add(self, *providers):
         for provider in providers:
+            self.providers.add(provider)
             for patt in provider.patterns:
                 self.registry[patt] = provider
 
+    def check_requirements(self):
+        for provider in self.providers:
+            [do_import(dependency) for dependency in provider.dependencies]
+            [check_executable(executable) for executable in provider.executables]
+
+    def get_requirements(self):
+        requirements = {'modules': [], 'executables': []}
+        for provider in self.providers:
+            requirements['modules'] += (provider.dependencies)
+            requirements['executables'] += (provider.executables)
+        return requirements
 
 class UnknownProtocol(LookupError):
     pass

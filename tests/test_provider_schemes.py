@@ -49,6 +49,14 @@ class TestLocalSchemes(unittest.TestCase):
         ap = AnyPath('file://test')
         self.assertEqual(type(ap), LocalPath)
 
+    def test_absolute_scheme(self):
+        ap = AnyPath('/test')
+        self.assertEqual(type(ap), LocalPath)
+
+    def test_relative_scheme(self):
+        ap = AnyPath('./test')
+        self.assertEqual(type(ap), LocalPath)
+
 
 class TestHgSchemes(unittest.TestCase):
 

@@ -3,7 +3,7 @@ from pathlib import Path
 from anypath.anypath import BasePath, pattern
 
 
-@pattern('file://')
+@pattern('file://', '/', './')
 class LocalPath(BasePath):
     def __init__(self, protocol, path, persist_dir):
         super().__init__(protocol, path, persist_dir)

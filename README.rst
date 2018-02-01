@@ -37,6 +37,9 @@ By default AnyPath does not install the dependencies for the different providers
     +-----------+---------------------------------+
     | sftp      | `pip install paramiko`          |
     +-----------+---------------------------------+
+    | local     | None                            |
+    +-----------+---------------------------------+
+
 
 Basic Usage
 -----------
@@ -72,6 +75,8 @@ Now you can open any uri that has a scheme known to one of the registered provid
     | sftp      | - `sftp://`                             |
     +-----------+-----------------------------------------+
     | local     | - `file://`                             |
+    |           | - `/`                                   |
+    |           | - `./`                                  |
     +-----------+-----------------------------------------+
 
 You can use AnyPath either as a contextmanager (`with AnyPath ...`) or directly by calling `fetch()`.

@@ -2,10 +2,11 @@ import os
 from pathlib import Path
 from stat import S_ISDIR
 from anypath.anypath import BasePath, pattern
-from anypath.dependencies import do_import
+from anypath.dependencies import dependencies
 
 
 @pattern('sftp://')
+@dependencies('paramiko')
 class SftpPath(BasePath):
     def __init__(self, protocol, path, persist_dir, password=None, private_key=None, port=22):
         super().__init__(protocol, path, persist_dir)
@@ -19,7 +20,7 @@ class SftpPath(BasePath):
         self.path = Path(self.path)
 
     @BasePath.wrapped
-    def fetch(self, paramiko=do_import('paramiko')):
+    def fetch(self, paramiko):
         self.sftp = paramiko.SFTPClient.from_transport(self._connect(paramiko))
         self.sftp.chdir(str(self.path.parent))
         self._walk(self.path)

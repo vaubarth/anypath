@@ -2,10 +2,11 @@ import shutil
 import subprocess
 
 from anypath.anypath import BasePath, pattern
-from anypath.dependencies import check_dependency
+from anypath.dependencies import required_executables
 
 
 @pattern('hg+http://', 'hg+https://')
+@required_executables('hg')
 class HgPath(BasePath):
     def __init__(self, protocol, path, persist_dir):
         super().__init__(protocol, path, persist_dir)
@@ -13,6 +14,5 @@ class HgPath(BasePath):
 
     @BasePath.wrapped
     def fetch(self):
-        check_dependency('hg')
         git_process = subprocess.Popen(['hg', 'clone', self.protocol + self.path, self.out_path])
         git_process.wait()
