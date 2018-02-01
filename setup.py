@@ -7,8 +7,8 @@ def readme():
 
 setup(
     name='anypath',
-    version='0.6.0',
-    description='AnyPath makes it trivial to fetch remote ressources and work with them locally.',
+    version='0.7.0',
+    description='AnyPath makes it trivial to fetch remote resources and work with them locally.',
     long_description=readme(),
     url='https://github.com/vaubarth/anypath',
     license='Mozilla Public License 2.0 (MPL 2.0)',
