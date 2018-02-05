@@ -8,17 +8,37 @@ from anypath.dependencies import do_import
 
 
 class BasePath(metaclass=ABCMeta):
+    """The base class for all PathProviders.
+    Defines common methods and class variables. It provides enter and exit methods so that all PathProviders can be used as context manaers.
+    :param protocol: Represents the protocol for the PathProvider, e.g. 'ssh://'
+    :param path: The remote path to be fetched
+    :param persist_dir: If specified, the directory to which the remote resource(s) should be copied to. It is used for further Path manipulations instead of the default temp directory.
+    :param options: Additional options for the PathProviders if they require/allow them
+    """
+    # List of required modules to be importer per Pathrovider
     dependencies = []
+    # List of executables that must be accessible for calling per PathProvider
     executables = []
-    def __init__(self, protocol, path, persist_dir=None, **options):
+
+    def __init__(self, protocol: str, path: str, persist_dir: str=None, **options: dict):
         self.persist_dir = persist_dir
         self.protocol = protocol
         self.path = path
+        # Temporary directory path
         self.td = None
+        # Path that will be used after the resources are fetched
         self.out_path = None
 
     @staticmethod
     def wrapped(func, *args, **kwargs):
+        """This decorator must be used on the fetch method as an entry point.
+        Before the decorated method is called the following things happen:
+        - Dependencies and executables are checked
+        - The temporary directory is created
+        After the decorated method is called the following things happen:
+        - The files are persisted if the persist_dir parameter is set
+        - The out_path is returned, which is either the temp dir or persist_dir
+        """
         def decorator(self):
             # Import all declared dependencies
             modules = [do_import(dependency) for dependency in self.dependencies]
@@ -31,10 +51,14 @@ class BasePath(metaclass=ABCMeta):
             func(self, *modules)
             self._persist()
             return self.out_path
+
         return decorator
 
     @abstractmethod
     def fetch(self, *dependencies):
+        """Must be implemented by all PathProviders, this method is called on __enter__
+        :param dependencies: The actual dependencies that the PathProvider needs are injected to the method as patameters
+        """
         pass
 
     def _make_temp(self):
@@ -42,6 +66,9 @@ class BasePath(metaclass=ABCMeta):
         self.out_path = Path(self.td).joinpath('out')
 
     def _persist(self):
+        """If persist_dir is set all files from the temporary directory are copied to it.
+        The out_path will be set to persist_dir if it is set.
+        """
         if not self.persist_dir:
             return self
         try:
@@ -66,10 +93,18 @@ class BasePath(metaclass=ABCMeta):
 
 # noinspection PyMissingConstructor
 class AnyPath(BasePath):
-    def __new__(cls, path, persist_dir=None, **options):
+    """This class represents the public API for anypath, it is called to instantiate a new PathProvider.
+    Usage example: AnyPath('ssh://path')
+    This class is never instantiated itself, it returns an instance of a PathProvider immediately in the __new__ method
+    :param path: The remote path to be fetched
+    :param persist_dir: If specified, the directory to which the remote resource(s) should be copied to. It is used for further Path manipulations instead of the default temp directory.
+    :param options: Additional options for the PathProviders if they require/allow them
+    """
+    def __new__(cls, path: str, persist_dir: str=None, **options: dict):
         for protocol, provider in path_provider.registry.items():
             if path.startswith(protocol):
                 path = path.replace(protocol, '', 1)
+                # Get the appropriate PathProvider from the provider-registry and instantiate it
                 fetcher = path_provider.registry[protocol](protocol, path, persist_dir, **options)
                 fetcher.dependencies = cls.dependencies
                 fetcher.executables = cls.executables
@@ -77,6 +112,7 @@ class AnyPath(BasePath):
         else:
             raise UnknownProtocol(f'Unknown protocol in {path} - Registered providers: {path_provider.registry}')
 
+    # Init is not used, the signature is provided to help with autocomplete etc. in IDEs
     def __init__(self, path, persist_dir=None, **options):
         pass
 
@@ -85,6 +121,10 @@ class AnyPath(BasePath):
 
 
 def pattern(*patterns):
+    """Decorator that registers a protocol on a PathProvider
+    Usage example: @pattern('http://', 'https://')
+    :param patterns: The patterns to be used as protocols
+    """
     def cls_decorator(cls):
         cls.patterns = [patt for patt in patterns]
         return cls
@@ -93,6 +133,8 @@ def pattern(*patterns):
 
 
 class _Provider:
+    """Holds references to all registered providers and links there protocol-patterns to them.
+    """
     def __init__(self):
         self.providers = set()
         self.registry = {}
@@ -111,9 +153,10 @@ class _Provider:
     def get_requirements(self):
         requirements = {'modules': [], 'executables': []}
         for provider in self.providers:
-            requirements['modules'] += (provider.dependencies)
-            requirements['executables'] += (provider.executables)
+            requirements['modules'] += provider.dependencies
+            requirements['executables'] += provider.executables
         return requirements
+
 
 class UnknownProtocol(LookupError):
     pass
