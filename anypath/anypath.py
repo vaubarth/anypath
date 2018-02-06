@@ -9,10 +9,12 @@ from anypath.dependencies import do_import
 
 class BasePath(metaclass=ABCMeta):
     """The base class for all PathProviders.
-    Defines common methods and class variables. It provides enter and exit methods so that all PathProviders can be used as context manaers.
+    Defines common methods and class variables. It provides enter and exit methods so that all PathProviders can be used
+    as context manaers.
     :param protocol: Represents the protocol for the PathProvider, e.g. 'ssh://'
     :param path: The remote path to be fetched
-    :param persist_dir: If specified, the directory to which the remote resource(s) should be copied to. It is used for further Path manipulations instead of the default temp directory.
+    :param persist_dir: If specified, the directory to which the remote resource(s) should be copied to. It is used for
+    further Path manipulations instead of the default temp directory.
     :param options: Additional options for the PathProviders if they require/allow them
     """
     # List of required modules to be importer per Pathrovider
@@ -61,7 +63,7 @@ class BasePath(metaclass=ABCMeta):
     @abstractmethod
     def fetch(self, *dependencies):
         """Must be implemented by all PathProviders, this method is called on __enter__
-        :param dependencies: The actual dependencies that the PathProvider needs are injected to the method as parameters
+        :param dependencies: The dependencies that the PathProvider needs are injected to the method as parameters
         """
         pass
 
@@ -101,7 +103,8 @@ class AnyPath(BasePath):
     Usage example: AnyPath('ssh://path')
     This class is never instantiated itself, it returns an instance of a PathProvider immediately in the __new__ method
     :param path: The remote path to be fetched
-    :param persist_dir: If specified, the directory to which the remote resource(s) should be copied to. It is used for further Path manipulations instead of the default temp directory.
+    :param persist_dir: If specified, the directory to which the remote resource(s) should be copied to. It is used for
+    further Path manipulations instead of the default temp directory.
     :param options: Additional options for the PathProviders if they require/allow them
     """
 

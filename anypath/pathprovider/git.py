@@ -7,7 +7,7 @@ from anypath.dependencies import required_executables
 @pattern('git+http://', 'git+https://', 'git://')
 @required_executables('git')
 class GitPath(BasePath):
-    def __init__(self, protocol, path, persist_dir, *args):
+    def __init__(self, protocol, path, persist_dir):
         super().__init__(protocol, path, persist_dir)
         self.protocol = protocol.replace('git+', '', 1)
 

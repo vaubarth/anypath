@@ -27,7 +27,7 @@ def required_executables(*executables):
     return cls_decorator
 
 
-def check_executable(exec):
-    if shutil.which(exec) is None:
-        raise NotInstalledError(f'{exec} is not installed or not on the path.')
-    return exec
+def check_executable(executable):
+    if shutil.which(executable) is None:
+        raise NotInstalledError(f'{executable} is not installed or not on the path.')
+    return executable

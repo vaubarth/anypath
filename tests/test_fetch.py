@@ -43,17 +43,17 @@ class TestFetching(unittest.TestCase):
 
         self.deps.append(sftp_mock)
 
-        with AnyPath('ssh://user@host:/example') as path:
+        with AnyPath('ssh://user@host:example') as path:
             self.assertTrue(path.parent.exists(), 'Path was not created')
 
     def test_git(self):
         GitPath._check_dependencies = self.mocked_dependencies
-        with patch('subprocess.Popen') as popen:
+        with patch('subprocess.Popen'):
             with AnyPath('git://asdas') as path:
                 self.assertTrue(path.parent.exists(), 'Path was not created')
 
     def test_hg(self):
         HgPath._check_dependencies = self.mocked_dependencies
-        with patch('subprocess.Popen') as popen:
+        with patch('subprocess.Popen'):
             with AnyPath('hg+http://asdas') as path:
                 self.assertTrue(path.parent.exists(), 'Path was not created')
