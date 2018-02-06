@@ -12,7 +12,7 @@ from anypath.pathprovider.sftp import SftpPath
 class TestFetching(unittest.TestCase):
 
     def setUp(self):
-        path_provider.add(LocalPath, HttpPath, SftpPath, GitPath)
+        path_provider.add(LocalPath, HttpPath, SftpPath, GitPath, HgPath)
         self.deps = []
 
     def mocked_dependencies(self):
