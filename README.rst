@@ -189,6 +189,23 @@ Local
 #####
 None
 
+Checking for dependencies
+^^^^^^^^^^^^^^^^^^^^^^^^^
+By default dependencies are only checked right before the appropriate PathProvider is called, i.e., at the moment the remote resources should be fetched.
+It is possible to check for dependencies as soon as all PathProviders are registered. There are two methods to do that, `get_requirements()` and `check_requirements()`.
+`get_requirements()` only returns a dictionary of all dependencies (modules and executables) that would be needed, while `check_requirements()` fully checks for all dependencies to be present and would raise an exception if they are not::
+
+    >>> path_provider.add(HttpPath, SftpPath, GitPath)
+    >>> path_provider.get_requirements()
+    {'modules': ['requests', 'paramiko'], 'executables': ['git']}
+
+If the requirements for HttpPath (the requests module) would not be met calling `check_requirements()` would raise an exceptioN::
+
+    >>> path_provider.add(HttpPath)
+    >>> path_provider.check_requirements()
+    ...anypath.dependencies.NotInstalledError: Python module requests is not installed.
+
+
 Limitations
 ^^^^^^^^^^^
 You might not want to use AnyPath if you are working with a huge remote resource.
