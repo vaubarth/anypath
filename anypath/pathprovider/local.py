@@ -7,7 +7,12 @@ from anypath.anypath import BasePath, pattern
 class LocalPath(BasePath):
     def __init__(self, protocol, path, persist_dir):
         super().__init__(protocol, path, persist_dir)
-        self.path = Path(self.path)
+        # In case we use 'file://' as protocol do not use it to construct the path
+        if self.protocol == 'file://':
+            protocol = ''
+        else:
+            protocol = self.protocol
+        self.path = Path(f'{protocol}{self.path}')
         self.out_path = self.path
 
     @BasePath.wrapped
