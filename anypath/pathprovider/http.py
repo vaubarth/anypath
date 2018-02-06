@@ -13,7 +13,7 @@ class HttpPath(BasePath):
         self.data = data
 
     @BasePath.wrapped
-    def fetch(self, requests, paramiko):
+    def fetch(self, requests):
         request = requests.Request(method=self.method,
                                    url=self.protocol + self.path,
                                    headers=self.headers,

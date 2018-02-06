@@ -20,7 +20,7 @@ class BasePath(metaclass=ABCMeta):
     # List of executables that must be accessible for calling per PathProvider
     executables = []
 
-    def __init__(self, protocol: str, path: str, persist_dir: str=None, **options: dict):
+    def __init__(self, protocol: str, path: str, persist_dir: str = None, **options: dict):
         self.persist_dir = persist_dir
         self.protocol = protocol
         self.path = path
@@ -39,13 +39,10 @@ class BasePath(metaclass=ABCMeta):
         - The files are persisted if the persist_dir parameter is set
         - The out_path is returned, which is either the temp dir or persist_dir
         """
-        def decorator(self):
-            # Import all declared dependencies
-            modules = [do_import(dependency) for dependency in self.dependencies]
-            # Check required executables
-            for executable in self.executables:
-                check_executable(executable)
 
+        def decorator(self):
+            modules = self._check_dependencies()
+            print(modules)
             self._make_temp()
             # TODO: Check ordering of dependecies vs. args
             func(self, *modules)
@@ -54,10 +51,18 @@ class BasePath(metaclass=ABCMeta):
 
         return decorator
 
+    def _check_dependencies(self):
+        # Import all declared dependencies
+        modules = [do_import(dependency) for dependency in self.dependencies]
+        # Check required executables
+        for executable in self.executables:
+            check_executable(executable)
+        return modules
+
     @abstractmethod
     def fetch(self, *dependencies):
         """Must be implemented by all PathProviders, this method is called on __enter__
-        :param dependencies: The actual dependencies that the PathProvider needs are injected to the method as patameters
+        :param dependencies: The actual dependencies that the PathProvider needs are injected to the method as parameters
         """
         pass
 
@@ -100,14 +105,15 @@ class AnyPath(BasePath):
     :param persist_dir: If specified, the directory to which the remote resource(s) should be copied to. It is used for further Path manipulations instead of the default temp directory.
     :param options: Additional options for the PathProviders if they require/allow them
     """
-    def __new__(cls, path: str, persist_dir: str=None, **options: dict):
+
+    def __new__(cls, path: str, persist_dir: str = None, **options: dict):
         for protocol, provider in path_provider.registry.items():
             if path.startswith(protocol):
                 path = path.replace(protocol, '', 1)
                 # Get the appropriate PathProvider from the provider-registry and instantiate it
                 fetcher = path_provider.registry[protocol](protocol, path, persist_dir, **options)
-                fetcher.dependencies = cls.dependencies
-                fetcher.executables = cls.executables
+                fetcher.dependencies = provider.dependencies
+                fetcher.executables = provider.executables
                 return fetcher
         else:
             raise UnknownProtocol(f'Unknown protocol in {path} - Registered providers: {path_provider.registry}')
@@ -125,6 +131,7 @@ def pattern(*patterns):
     Usage example: @pattern('http://', 'https://')
     :param patterns: The patterns to be used as protocols
     """
+
     def cls_decorator(cls):
         cls.patterns = [patt for patt in patterns]
         return cls
@@ -134,7 +141,9 @@ def pattern(*patterns):
 
 class _Provider:
     """Holds references to all registered providers and links there protocol-patterns to them.
+    Additionally handles the dependencies of all registered providers
     """
+
     def __init__(self):
         self.providers = set()
         self.registry = {}
