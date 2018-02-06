@@ -12,7 +12,7 @@ class LocalPath(BasePath):
             protocol = ''
         else:
             protocol = self.protocol
-        self.path = Path(f'{protocol}{self.path}')
+        self.path = Path(f'{protocol}{path}')
         self.out_path = self.path
 
     @BasePath.wrapped

@@ -1,3 +1,4 @@
+import importlib
 import os
 from pathlib import Path
 from stat import S_ISDIR
@@ -5,7 +6,7 @@ from anypath.anypath import BasePath, pattern
 from anypath.dependencies import dependencies
 
 
-@pattern('sftp://')
+@pattern('sftp://', 'ssh://')
 @dependencies('paramiko')
 class SftpPath(BasePath):
     def __init__(self, protocol, path, persist_dir, password=None, private_key=None, port=22):
@@ -37,14 +38,12 @@ class SftpPath(BasePath):
         return transport
 
     def _check_host(self, paramiko):
-        from paramiko import SSHException
-
         hostkeys = paramiko.hostkeys.HostKeys()
         hostkeys.load(Path('~').expanduser().joinpath('.ssh', 'known_hosts'))
         if len(hostkeys.items()) == 0:
             raise Exception('No Host Keys Found')
         if hostkeys.lookup(self.host) is None:
-            raise SSHException(f'No hostkey for host {self.host} found.')
+            raise Exception(f'No hostkey for host {self.host} found.')
 
     # TODO: something nicer than replace first /
     def _walk(self, path):

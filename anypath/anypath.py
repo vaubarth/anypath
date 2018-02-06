@@ -42,7 +42,6 @@ class BasePath(metaclass=ABCMeta):
 
         def decorator(self):
             modules = self._check_dependencies()
-            print(modules)
             self._make_temp()
             # TODO: Check ordering of dependecies vs. args
             func(self, *modules)
@@ -91,7 +90,7 @@ class BasePath(metaclass=ABCMeta):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
         if exc_type:
-            return exc_type
+            raise exc_type
         else:
             return True
 

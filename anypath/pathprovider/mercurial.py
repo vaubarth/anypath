@@ -1,4 +1,3 @@
-import shutil
 import subprocess
 
 from anypath.anypath import BasePath, pattern
