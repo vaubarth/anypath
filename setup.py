@@ -7,7 +7,7 @@ def readme():
 
 setup(
     name='anypath',
-    version='0.7.5',
+    version='0.8.0',
     description='AnyPath makes it trivial to fetch remote resources and work with them locally.',
     long_description=readme(),
     url='https://github.com/vaubarth/anypath',
