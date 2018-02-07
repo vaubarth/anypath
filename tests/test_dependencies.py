@@ -2,10 +2,10 @@ import unittest
 
 from anypath.anypath import path_provider
 from anypath.pathprovider.git import GitPath
+from anypath.pathprovider.http import HttpPath
+from anypath.pathprovider.local import LocalPath
 from anypath.pathprovider.mercurial import HgPath
 from anypath.pathprovider.sftp import SftpPath
-from anypath.pathprovider.local import LocalPath
-from anypath.pathprovider.http import HttpPath
 
 
 class TestExecutables(unittest.TestCase):

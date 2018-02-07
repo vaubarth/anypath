@@ -1,10 +1,13 @@
-from pathlib import Path
+import logging
 import shutil
 from abc import ABCMeta, abstractmethod
+from pathlib import Path
 from tempfile import mkdtemp
 
 from anypath.dependencies import check_executable
 from anypath.dependencies import do_import
+
+LOG = logging.getLogger('anypath.anypath')
 
 
 class BasePath(metaclass=ABCMeta):
@@ -45,7 +48,7 @@ class BasePath(metaclass=ABCMeta):
         def decorator(self):
             modules = self._check_dependencies()
             self._make_temp()
-            # TODO: Check ordering of dependecies vs. args
+            # TODO: Check ordering of dependencies vs. args
             func(self, *modules)
             self._persist()
             return self.out_path
@@ -53,6 +56,7 @@ class BasePath(metaclass=ABCMeta):
         return decorator
 
     def _check_dependencies(self):
+        LOG.debug('Checking for dependencies of PathProvider %s', self.__class__)
         # Import all declared dependencies
         modules = [do_import(dependency) for dependency in self.dependencies]
         # Check required executables
@@ -68,8 +72,10 @@ class BasePath(metaclass=ABCMeta):
         pass
 
     def _make_temp(self):
+        LOG.debug('Creating temporary directory')
         self.td = mkdtemp()
         self.out_path = Path(self.td).joinpath('out')
+        LOG.debug('Out path is set to %s', self.out_path)
 
     def _persist(self):
         """If persist_dir is set all files from the temporary directory are copied to it.
@@ -77,6 +83,7 @@ class BasePath(metaclass=ABCMeta):
         """
         if not self.persist_dir:
             return self
+        LOG.debug('Persisting files to %s', self.persist_dir)
         try:
             shutil.copytree(str(self.out_path.resolve()), self.persist_dir)
         except NotADirectoryError:
@@ -111,9 +118,12 @@ class AnyPath(BasePath):
     def __new__(cls, path: str, persist_dir: str = None, **options: dict):
         for protocol, provider in path_provider.registry.items():
             if path.startswith(protocol):
+                LOG.debug('Protocol is %s', protocol)
                 path = path.replace(protocol, '', 1)
                 # Get the appropriate PathProvider from the provider-registry and instantiate it
-                fetcher = path_provider.registry[protocol](protocol, path, persist_dir, **options)
+                fetcher = path_provider.registry[protocol]
+                LOG.debug('Using PathProvider %s', fetcher)
+                fetcher = fetcher(protocol, path, persist_dir, **options)
                 fetcher.dependencies = provider.dependencies
                 fetcher.executables = provider.executables
                 return fetcher
@@ -157,6 +167,7 @@ class _Provider:
                 self.registry[patt] = provider
 
     def check_requirements(self):
+        LOG.debug('Checking requirements for registered PathProviders %s', self.providers)
         for provider in self.providers:
             [do_import(dependency) for dependency in provider.dependencies]
             [check_executable(executable) for executable in provider.executables]
@@ -166,6 +177,7 @@ class _Provider:
         for provider in self.providers:
             requirements['modules'] += provider.dependencies
             requirements['executables'] += provider.executables
+        LOG.debug('Requirements for registered PathProviders %s are %s', self.providers, requirements)
         return requirements
 
 

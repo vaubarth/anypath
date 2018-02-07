@@ -3,15 +3,17 @@ AnyPath
 =======
 AnyPath makes it trivial to fetch remote resources and work with them locally.
 It provides a normalized interface over different resources so that handling them is always consistent.
-Example::
 
-    with AnyPath('ssh://jane@host:/home/jane') as path:
+.. code-block:: python
+
+    with AnyPath('sftp://jane@host:/home/jane') as path:
         path.joinpath('somefile.txt').open().read()
 
 Here AnyPath will copy the directory /home/jane from a remote host via ssh to a local temporary directory.
 It is then possible to work with the files locally. After we are done the temporary files are deleted.
 Therefore AnyPath is useful if you want to fetch e.g. some config files or a small project directory from a remote location and work with it locally.
 
+.. contents:: :local:
 
 Getting Started
 ===============
@@ -73,6 +75,7 @@ Now you can open any uri that has a scheme known to one of the registered provid
     |           | - `https://`                            |
     +-----------+-----------------------------------------+
     | sftp      | - `sftp://`                             |
+    |           | - `ssh://`                              |
     +-----------+-----------------------------------------+
     | local     | - `file://`                             |
     |           | - `/`                                   |
@@ -99,7 +102,7 @@ Sometimes however you may want to persist the remote resource outside of a tempo
 
    path_provider.add(HttpPath)
 
-   with AnyPath('sftp://user@localhost:/path/on/host', persist_dir='/your/local/path') as path:
+   with AnyPath('http://example.org', persist_dir='/your/local/path') as path:
        path.open().read()
 
 Instead of copying the files manually you can specify a `persist_dir` when creating the AnyPath. The temporary resources will then be copied to that location.
@@ -193,13 +196,17 @@ Checking for dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 By default dependencies are only checked right before the appropriate PathProvider is called, i.e., at the moment the remote resources should be fetched.
 It is possible to check for dependencies as soon as all PathProviders are registered. There are two methods to do that, `get_requirements()` and `check_requirements()`.
-`get_requirements()` only returns a dictionary of all dependencies (modules and executables) that would be needed, while `check_requirements()` fully checks for all dependencies to be present and would raise an exception if they are not::
+`get_requirements()` only returns a dictionary of all dependencies (modules and executables) that would be needed, while `check_requirements()` fully checks for all dependencies to be present and would raise an exception if they are not:
+
+.. code-block:: python
 
     >>> path_provider.add(HttpPath, SftpPath, GitPath)
     >>> path_provider.get_requirements()
     {'modules': ['requests', 'paramiko'], 'executables': ['git']}
 
-If the requirements for HttpPath (the requests module) would not be met calling `check_requirements()` would raise an exceptioN::
+If the requirements for HttpPath (the requests module) would not be met calling `check_requirements()` would raise an exception:
+
+.. code-block:: python
 
     >>> path_provider.add(HttpPath)
     >>> path_provider.check_requirements()

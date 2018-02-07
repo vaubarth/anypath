@@ -6,4 +6,5 @@ path_provider.check_requirements()
 
 with AnyPath('http://example.org') as path:
     content = path.read_text()
+
 print(content)

@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from stat import S_ISDIR
+
 from anypath.anypath import BasePath, pattern
 from anypath.dependencies import dependencies
 
