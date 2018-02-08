@@ -9,11 +9,23 @@ It provides a normalized interface over different resources so that handling the
     with AnyPath('sftp://jane@host:/home/jane') as path:
         path.joinpath('somefile.txt').open().read()
 
-Here AnyPath will copy the directory /home/jane from a remote host via ssh to a local temporary directory.
+Here AnyPath will copy the directory `/home/jane` from a remote host via ssh to a local temporary directory.
 It is then possible to work with the files locally. After we are done the temporary files are deleted.
 Therefore AnyPath is useful if you want to fetch e.g. some config files or a small project directory from a remote location and work with it locally.
 
-.. contents:: :local:
+- `Getting Started`_
+- `Basic Usage`_
+    - `Persistance`_
+    - `Providers and options`_
+        - `Http`_
+        - `Sftp`_
+        - `Git`_
+        - `Mercurial`_
+        - `Local`_
+    - `Checking for dependencies`_
+    - `Limitations`_
+- `Contributing`_
+    - `License`_
 
 Getting Started
 ===============
@@ -223,6 +235,7 @@ Contributing
 ============
 You can contribute in any of the following areas, no matter if it is your first OSS contribution or your thousandths.
 Contributions are welcome for example:
+
 - If you find any issue or bug when using AnyPath
 - If you want to add to the documentation or fix incorrect or missing documentation.
 - If you want to add features or work on the codebase in general
