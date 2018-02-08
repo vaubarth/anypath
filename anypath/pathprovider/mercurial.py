@@ -13,5 +13,5 @@ class HgPath(BasePath):
 
     @BasePath.wrapped
     def fetch(self):
-        git_process = subprocess.Popen(['hg', 'clone', self.protocol + self.path, self.out_path])
+        git_process = subprocess.Popen(['hg', 'clone', self.protocol + str(self.path), str(self.out_path)])
         git_process.wait()

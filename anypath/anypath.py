@@ -91,7 +91,10 @@ class BasePath(metaclass=ABCMeta):
         self.out_path = Path(self.persist_dir).resolve()
 
     def close(self):
-        shutil.rmtree(self.td)
+        try:
+            shutil.rmtree(self.td)
+        except PermissionError as e:
+            LOG.debug('Could not delete temporary files %s', e.strerror)
 
     def __enter__(self):
         return self.fetch()
