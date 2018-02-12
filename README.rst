@@ -15,19 +15,27 @@ Therefore AnyPath is useful if you want to fetch e.g. some config files or a sma
 
 - `Getting Started`_
 - `Basic Usage`_
-    - `Persistance`_
+
+  - `Persistance`_
+
     - `Providers and options`_
-        - `Http`_
-        - `Sftp`_
-        - `Git`_
-        - `Mercurial`_
-        - `Local`_
-    - `Checking for dependencies`_
-    - `Limitations`_
+
+      - `Http`_
+      - `Sftp`_
+      - `Git`_
+      - `Mercurial`_
+      - `Local`_
+
+  - `Checking for dependencies`_
+  - `Limitations`_
+
 - `Contributing`_
-    - `Writing a new PathProvider`_
-        - `Decorators`_
-        - `The fetch method`_
+
+  - `Writing a new PathProvider`_
+
+    - `Decorators`_
+    - `The fetch method`_
+
 - `License`_
 
 Getting Started
