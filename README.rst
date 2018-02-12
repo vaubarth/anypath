@@ -25,7 +25,10 @@ Therefore AnyPath is useful if you want to fetch e.g. some config files or a sma
     - `Checking for dependencies`_
     - `Limitations`_
 - `Contributing`_
-    - `License`_
+    - `Writing a new PathProvider`_
+        - `Decorators`_
+        - `The fetch method`_
+- `License`_
 
 Getting Started
 ===============
@@ -57,8 +60,8 @@ By default AnyPath does not install the dependencies for the different providers
 
 Basic Usage
 -----------
-AnyPath uses `pathproviders` to handle different remote resources. The resources are then fetched to a new temporary directory where you can work with them.
-The newly fetched ressources are wrapped in a `pathlib.Path`.
+AnyPath uses :code:`pathproviders` to handle different remote resources. The resources are then fetched to a new temporary directory where you can work with them.
+The newly fetched ressources are wrapped in a :code:`pathlib.Path`.
 
 .. code-block:: python
 
@@ -94,8 +97,8 @@ Now you can open any uri that has a scheme known to one of the registered provid
     |           | - `./`                                  |
     +-----------+-----------------------------------------+
 
-You can use AnyPath either as a contextmanager (`with AnyPath ...`) or directly by calling `fetch()`.
-Beware that you will have to call `close()` manually when not using the contextmanager to cleanup the temporary files.
+You can use AnyPath either as a contextmanager (:code:`with AnyPath ...`) or directly by calling :code:`fetch()`.
+Beware that you will have to call :code:`close()` manually when not using the contextmanager to cleanup the temporary files.
 
 .. code-block:: python
 
@@ -117,8 +120,8 @@ Sometimes however you may want to persist the remote resource outside of a tempo
    with AnyPath('http://example.org', persist_dir='/your/local/path') as path:
        path.open().read()
 
-Instead of copying the files manually you can specify a `persist_dir` when creating the AnyPath. The temporary resources will then be copied to that location.
-As a result you will get the `persist_dir` wrapped as an `pathlib.Path` instead of the temporary location and you can directly work with it.
+Instead of copying the files manually you can specify a :code:`persist_dir` when creating the AnyPath. The temporary resources will then be copied to that location.
+As a result you will get the :code:`persist_dir` wrapped as an :code:`pathlib.Path` instead of the temporary location and you can directly work with it.
 
 Providers and options
 ^^^^^^^^^^^^^^^^^^^^^
@@ -164,7 +167,7 @@ params      Default: None
 
 Sftp
 ####
-The path for Sftp is expected to be in the format `sftp://user@host:/path/on/host`, additional options can be set via arguments.
+The path for Sftp is expected to be in the format :code:`sftp://user@host:/path/on/host`, additional options can be set via arguments.
 
 .. code-block:: python
 
@@ -207,8 +210,8 @@ None
 Checking for dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 By default dependencies are only checked right before the appropriate PathProvider is called, i.e., at the moment the remote resources should be fetched.
-It is possible to check for dependencies as soon as all PathProviders are registered. There are two methods to do that, `get_requirements()` and `check_requirements()`.
-`get_requirements()` only returns a dictionary of all dependencies (modules and executables) that would be needed, while `check_requirements()` fully checks for all dependencies to be present and would raise an exception if they are not:
+It is possible to check for dependencies as soon as all PathProviders are registered. There are two methods to do that, :code:`get_requirements()` and :code:`check_requirements()`.
+:code:`get_requirements()` only returns a dictionary of all dependencies (modules and executables) that would be needed, while :code:`check_requirements()` fully checks for all dependencies to be present and would raise an exception if they are not:
 
 .. code-block:: python
 
@@ -216,7 +219,7 @@ It is possible to check for dependencies as soon as all PathProviders are regist
     >>> path_provider.get_requirements()
     {'modules': ['requests', 'paramiko'], 'executables': ['git']}
 
-If the requirements for HttpPath (the requests module) would not be met calling `check_requirements()` would raise an exception:
+If the requirements for HttpPath (the requests module) would not be met calling :code:`check_requirements()` would raise an exception:
 
 .. code-block:: python
 
@@ -242,6 +245,63 @@ Contributions are welcome for example:
 
 Just file an issue in the tracker first describing what you would like to do and then create a pull-request.
 
+Writing a new PathProvider
+--------------------------
+Creating a new PathProvider requires writing a new class; using it requires registering it via :code:`path_provider.add()`
+
+The basic structure of a PathProvider looks like this:
+
+.. code-block:: python
+
+    @pattern('protocol://')
+    @required_executables('some_executable')
+    @dependencies('some_py_module')
+    class MyPath(BasePath):
+        def __init__(self, protocol, path, persist_dir, some_option='default'):
+            super().__init__(protocol, path, persist_dir)
+            ...
+
+        @BasePath.wrapped
+        def fetch(self):
+            ...
+
+Here a PathProvider MyPath is created, it registers a protocol that it can handle, declares some requirements and has a fetch method which does the actual work.
+The PathProvider must always inherit from :code:`anypath.BasePath`.
+
+Decorators
+^^^^^^^^^^
+There are three class decorators available for a PathProvider:
+
+:code:`pattern('')`
+
+This decorator is required. It lists all patterns a path can start with on which the PathProvider can act. In the example MyPath registers the pattern :code:`protocol://`,
+meaning whenever a path start with :code:`protocol://` MyPath will be called.
+
+A PathProvider can register more than one pattern, each pattern is passed as a single argument to the pattern decorator.
+The HttpPath for example registers :code:`http://` and :code:`https://` using :code:`@pattern('http://', 'https://')`.
+
+
+:code:`required_executables('')`
+
+This decorator is optional. It lists all required executables which must be available on the system to perform the tasks of the PathProvider.
+In the example MyPath specifies, that :code:`some_executable` must exists and be callable from within the program.
+
+AnyPath checks for the existence via checking :code:`shutil.which(executable) is None` where :code:`executable` is the exectuable specified in :code:`required_executables()`.
+
+
+:code:`dependencies('')`
+
+This decorator is optional. It lists all required python modules which must be available to be imported to perform the tasks of the PathProvider.
+In the example MyPath specifies, that :code:`some_py_module` must exists and be importable.
+
+AnyPath will import the module via :code:`importlib.import_module(module)` where :code:`module` is the module specified in :code:`dependencies()`.
+
+The fetch method
+^^^^^^^^^^^^^^^^
+The class must include a :code:`fetch` method which will be called to fetch the remote resources.
+The fetch method must have the method decorator :code:`@BasePath.wrapped`. Its main purpose is to call pre and post actions to fetching the resources.
+Those actions are creating a temporary directory and persisting the temporary files if needed.
+
 License
--------
+=======
 AnyPath is licensed under "Mozilla Public License Version 2.0". See LICENSE.txt for the full license.
