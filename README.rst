@@ -13,18 +13,20 @@ Here AnyPath will copy the directory `/home/jane` from a remote host via ssh to 
 It is then possible to work with the files locally. After we are done the temporary files are deleted.
 Therefore AnyPath is useful if you want to fetch e.g. some config files or a small project directory from a remote location and work with it locally.
 
-- `Getting Started`_
+- `Installation`_
+
+  - `Dependencies`_
+
 - `Basic Usage`_
 
   - `Persistance`_
+  - `Providers and options`_
 
-    - `Providers and options`_
-
-      - `Http`_
-      - `Sftp`_
-      - `Git`_
-      - `Mercurial`_
-      - `Local`_
+    - `Http`_
+    - `Sftp`_
+    - `Git`_
+    - `Mercurial`_
+    - `Local`_
 
   - `Checking for dependencies`_
   - `Limitations`_
@@ -38,17 +40,15 @@ Therefore AnyPath is useful if you want to fetch e.g. some config files or a sma
 
 - `License`_
 
-Getting Started
-===============
 
 Installation
-------------
+============
 To install simply do::
 
     pip install anypath
 
 Dependencies
-^^^^^^^^^^^^
+------------
 By default AnyPath does not install the dependencies for the different providers. You should install them as needed:
 
     +-----------+---------------------------------+
@@ -67,7 +67,7 @@ By default AnyPath does not install the dependencies for the different providers
 
 
 Basic Usage
------------
+===========
 AnyPath uses :code:`pathproviders` to handle different remote resources. The resources are then fetched to a new temporary directory where you can work with them.
 The newly fetched ressources are wrapped in a :code:`pathlib.Path`.
 
@@ -117,7 +117,7 @@ Beware that you will have to call :code:`close()` manually when not using the co
    ap.close()
 
 Persistance
-^^^^^^^^^^^
+-----------
 The example so far was useful if you are only interested in the content of a fetched resource. They are created in a temporary folder, where you can work with them, and are deleted afterwards.
 Sometimes however you may want to persist the remote resource outside of a temporary location.
 
@@ -132,14 +132,14 @@ Instead of copying the files manually you can specify a :code:`persist_dir` when
 As a result you will get the :code:`persist_dir` wrapped as an :code:`pathlib.Path` instead of the temporary location and you can directly work with it.
 
 Providers and options
-^^^^^^^^^^^^^^^^^^^^^
+---------------------
 While the defaults for fetching resources might be fine for many use cases there are many situations where you might want to pass some options to a provider.
 You might for example want to do a POST with an HttpPath or pass credentials to a GitPath.
 
 Options are always passed as keyword arguments. Following you will find all providers and their available options.
 
 Http
-####
+^^^^
 The options are passed to a requests.Request object, they behave the same and are named accordingly.
 
 .. code-block:: python
@@ -174,7 +174,7 @@ params      Default: None
 =========   ============================================================
 
 Sftp
-####
+^^^^
 The path for Sftp is expected to be in the format :code:`sftp://user@host:/path/on/host`, additional options can be set via arguments.
 
 .. code-block:: python
@@ -204,19 +204,19 @@ port            Default: 22
 ============    ============================================================
 
 Git
-###
+^^^
 None
 
 Mercurial
-#########
+^^^^^^^^^
 None
 
 Local
-#####
+^^^^^
 None
 
 Checking for dependencies
-^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------
 By default dependencies are only checked right before the appropriate PathProvider is called, i.e., at the moment the remote resources should be fetched.
 It is possible to check for dependencies as soon as all PathProviders are registered. There are two methods to do that, :code:`get_requirements()` and :code:`check_requirements()`.
 :code:`get_requirements()` only returns a dictionary of all dependencies (modules and executables) that would be needed, while :code:`check_requirements()` fully checks for all dependencies to be present and would raise an exception if they are not:
@@ -237,7 +237,7 @@ If the requirements for HttpPath (the requests module) would not be met calling 
 
 
 Limitations
-^^^^^^^^^^^
+-----------
 You might not want to use AnyPath if you are working with a huge remote resource.
 Everything is fetched to your local machine, which might take some time and cost a lot of space if you try to work with a whole filesystemn of a remote host for example.
 It is also not intended do do updates to the remote resource since there is no mechanism to write changes back to the remote.
